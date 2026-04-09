@@ -63,6 +63,26 @@ app.get('/responses', async (req, res) => {
   }
 });
 
+// TEST ROUTE: Does the Proxy even see the Survey?
+app.get('/test-connection', async (req, res) => {
+  try {
+      const { surveyId, datacenter } = req.query;
+      const url = `https://${datacenter}.qualtrics.com/API/v3/survey-definitions/${surveyId}`;
+      
+      const response = await axios.get(url, {
+          headers: { 'X-API-TOKEN': process.env.QUALTRICS_TOKEN }
+      });
+
+      res.json({
+          status: "Connected!",
+          surveyName: response.data.result.SurveyName,
+          responseCount: response.data.result.ResponseCount
+      });
+  } catch (error) {
+      res.status(500).json(error.response?.data || error.message);
+  }
+});
+
 app.get('/health', (req, res) => {
   res.json({ ok: true });
 });
