@@ -44,6 +44,25 @@ app.post('/submit-survey', async (req, res) => {
   }
 });
 
+// NEW: The "Dashboard" Route to fetch results
+app.get('/responses', async (req, res) => {
+  try {
+      const { surveyId, datacenter } = req.query; // Dashboard passes these in the URL
+      
+      const url = `https://${datacenter}.qualtrics.com/API/v3/surveys/${surveyId}/responses`;
+      
+      const response = await axios.get(url, {
+          headers: { 'X-API-TOKEN': process.env.QUALTRICS_TOKEN }
+      });
+
+      // We send back just the results array to keep it clean for the dashboard
+      res.json(response.data.result.elements); 
+  } catch (error) {
+      console.error("Fetch Error:", error.response?.data || error.message);
+      res.status(500).json({ error: "Could not fetch vibes." });
+  }
+});
+
 app.get('/health', (req, res) => {
   res.json({ ok: true });
 });
